@@ -8,7 +8,9 @@ import (
 	"time"
 
 	"github.com/azizanonerm/fintrack-api/internal/config"
+	"github.com/azizanonerm/fintrack-api/internal/handler"
 	"github.com/azizanonerm/fintrack-api/internal/repository"
+	"github.com/azizanonerm/fintrack-api/internal/service"
 )
 
 func healthHandler(w http.ResponseWriter, r *http.Request) {
@@ -30,11 +32,15 @@ func main() {
 		log.Fatalf("connect to database: %v", err)
 	}
 	defer pool.Close()
+	userRepository := repository.NewUserRepository(pool)
+	userService := service.NewUserService(userRepository)
+	authHandler := handler.NewAuthHandler(userService)
 
 	log.Println("database connection established")
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", healthHandler)
+	mux.HandleFunc("POST /api/v1/auth/register", authHandler.Register)
 
 	address := ":8080"
 	log.Printf("server running at http://localhost%s", address)
