@@ -34,13 +34,14 @@ func main() {
 	defer pool.Close()
 	userRepository := repository.NewUserRepository(pool)
 	userService := service.NewUserService(userRepository)
-	authHandler := handler.NewAuthHandler(userService)
+	authHandler := handler.NewAuthHandler(userService, cfg.JWTSecret)
 
 	log.Println("database connection established")
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", healthHandler)
 	mux.HandleFunc("POST /api/v1/auth/register", authHandler.Register)
+	mux.HandleFunc("POST /api/v1/auth/login", authHandler.Login)
 
 	address := ":8080"
 	log.Printf("server running at http://localhost%s", address)

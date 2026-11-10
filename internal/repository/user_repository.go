@@ -42,3 +42,26 @@ func (r *UserRepository) Create(ctx context.Context, user model.User) (model.Use
 func ParseUserID(id string) (uuid.UUID, error) {
 	return uuid.Parse(id)
 }
+
+func (r *UserRepository) GetByEmail(ctx context.Context, email string) (model.User, error) {
+	query := `
+		SELECT id, name, email, password_hash, created_at
+		FROM users
+		WHERE email = $1
+	`
+
+	var user model.User
+
+	err := r.pool.QueryRow(ctx, query, email).Scan(
+		&user.ID,
+		&user.Name,
+		&user.Email,
+		&user.PasswordHash,
+		&user.CreatedAt,
+	)
+	if err != nil {
+		return model.User{}, fmt.Errorf("get user by email: %w", err)
+	}
+
+	return user, nil
+}
