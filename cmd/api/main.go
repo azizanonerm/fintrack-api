@@ -9,6 +9,7 @@ import (
 
 	"github.com/azizanonerm/fintrack-api/internal/config"
 	"github.com/azizanonerm/fintrack-api/internal/handler"
+	"github.com/azizanonerm/fintrack-api/internal/middleware"
 	"github.com/azizanonerm/fintrack-api/internal/repository"
 	"github.com/azizanonerm/fintrack-api/internal/service"
 )
@@ -42,6 +43,7 @@ func main() {
 	mux.HandleFunc("GET /health", healthHandler)
 	mux.HandleFunc("POST /api/v1/auth/register", authHandler.Register)
 	mux.HandleFunc("POST /api/v1/auth/login", authHandler.Login)
+	mux.Handle("GET /api/v1/auth/me", middleware.Auth(cfg.JWTSecret)(http.HandlerFunc(authHandler.Me)))
 
 	address := ":8080"
 	log.Printf("server running at http://localhost%s", address)
