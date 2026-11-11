@@ -36,6 +36,9 @@ func main() {
 	userRepository := repository.NewUserRepository(pool)
 	userService := service.NewUserService(userRepository)
 	authHandler := handler.NewAuthHandler(userService, cfg.JWTSecret)
+	transactionRepository := repository.NewTransactionRepository(pool)
+	transactionService := service.NewTransactionService(transactionRepository)
+	transactionHandler := handler.NewTransactionHandler(transactionService)
 
 	log.Println("database connection established")
 
@@ -44,6 +47,8 @@ func main() {
 	mux.HandleFunc("POST /api/v1/auth/register", authHandler.Register)
 	mux.HandleFunc("POST /api/v1/auth/login", authHandler.Login)
 	mux.Handle("GET /api/v1/auth/me", middleware.Auth(cfg.JWTSecret)(http.HandlerFunc(authHandler.Me)))
+	mux.Handle("POST /api/v1/transactions", middleware.Auth(cfg.JWTSecret)(http.HandlerFunc(transactionHandler.Create)))
+	mux.Handle("GET /api/v1/transactions", middleware.Auth(cfg.JWTSecret)(http.HandlerFunc(transactionHandler.List)))
 
 	address := ":8080"
 	log.Printf("server running at http://localhost%s", address)
