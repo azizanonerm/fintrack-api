@@ -49,6 +49,8 @@ func main() {
 	mux.Handle("GET /api/v1/auth/me", middleware.Auth(cfg.JWTSecret)(http.HandlerFunc(authHandler.Me)))
 	mux.Handle("POST /api/v1/transactions", middleware.Auth(cfg.JWTSecret)(http.HandlerFunc(transactionHandler.Create)))
 	mux.Handle("GET /api/v1/transactions", middleware.Auth(cfg.JWTSecret)(http.HandlerFunc(transactionHandler.List)))
+	mux.Handle("PUT /api/v1/transactions/{id}", middleware.Auth(cfg.JWTSecret)(http.HandlerFunc(transactionHandler.Update)))
+	mux.Handle("DELETE /api/v1/transactions/{id}", middleware.Auth(cfg.JWTSecret)(http.HandlerFunc(transactionHandler.Delete)))
 
 	address := ":8080"
 	log.Printf("server running at http://localhost%s", address)
