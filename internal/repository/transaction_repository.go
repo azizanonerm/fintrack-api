@@ -189,3 +189,30 @@ func (r *TransactionRepository) Delete(
 
 	return nil
 }
+
+func (r *TransactionRepository) Summary(
+	ctx context.Context,
+	userID uuid.UUID,
+) (model.Summary, error) {
+	query := `
+		SELECT
+			COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0),
+			COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0)
+		FROM transactions
+		WHERE user_id = $1
+	`
+
+	var summary model.Summary
+
+	err := r.pool.QueryRow(ctx, query, userID).Scan(
+		&summary.TotalIncome,
+		&summary.TotalExpense,
+	)
+	if err != nil {
+		return model.Summary{}, fmt.Errorf("get summary: %w", err)
+	}
+
+	summary.Balance = summary.TotalIncome - summary.TotalExpense
+
+	return summary, nil
+}

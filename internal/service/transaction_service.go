@@ -77,3 +77,10 @@ func (s *TransactionService) Update(ctx context.Context, userID, transactionID u
 func (s *TransactionService) Delete(ctx context.Context, userID, transactionID uuid.UUID) error {
 	return s.repository.Delete(ctx, userID, transactionID)
 }
+
+func (s *TransactionService) Summary(
+	ctx context.Context,
+	userID uuid.UUID,
+) (model.Summary, error) {
+	return s.repository.Summary(ctx, userID)
+}
